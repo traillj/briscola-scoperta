@@ -13,7 +13,8 @@ public class Hand
 
     // Draws cards from the deck and moves them to
     // the specified card positions.
-    public Hand(Deck deck, Vector3[] cardPositions)
+    // If it's a player's hand, cards can be played by clicking.
+    public Hand(Deck deck, Vector3[] cardPositions, bool player)
     {
         this.deck = deck;
         cards = new GameObject[HAND_SIZE];
@@ -21,6 +22,12 @@ public class Hand
         {
             cards[i] = deck.DrawTopCard();
             cards[i].GetComponent<Transform>().position = cardPositions[i];
+
+            if (player)
+            {
+                cards[i].AddComponent<BoxCollider2D>();
+            }
+            cards[i].AddComponent<Card>();
         }
     }
 

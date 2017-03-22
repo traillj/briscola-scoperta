@@ -15,8 +15,8 @@ public class Game : MonoBehaviour
     void Start()
     {
         Deck deck = new Deck();
-        playerHand = new Hand(deck, playerCardPositions);
-        compHand = new Hand(deck, compCardPositions);
+        playerHand = new Hand(deck, playerCardPositions, true);
+        compHand = new Hand(deck, compCardPositions, false);
     }
 
 }
