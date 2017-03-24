@@ -22,8 +22,13 @@ public class Card : MonoBehaviour
             playPos, Time.deltaTime * speed);
     }
 
-    public void OnMouseUp()
+    void OnMouseUp()
     {
         playPos = new Vector3(transform.position.x, yDistFromCentre);
+    }
+
+    public void DisableTouch()
+    {
+        Destroy(this.GetComponent<BoxCollider2D>());
     }
 }
