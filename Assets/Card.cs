@@ -15,6 +15,13 @@ public class Card : MonoBehaviour
     private Vector3 playPos;
     private float speed = 7.0f;
 
+    public void InitInfo(int points, char symbol, char suit)
+    {
+        this.points = points;
+        this.symbol = symbol;
+        this.suit = suit;
+    }
+
     void Start()
     {
         playPos = transform.position;
@@ -43,28 +50,13 @@ public class Card : MonoBehaviour
         return points;
     }
 
-    public void SetPoints(int points)
-    {
-        this.points = points;
-    }
-
     public char GetSymbol()
     {
         return symbol;
     }
 
-    public void SetSymbol(char symbol)
-    {
-        this.symbol = symbol;
-    }
-
     public char GetSuit()
     {
         return suit;
-    }
-
-    public void SetSuit(char suit)
-    {
-        this.suit = suit;
     }
 }

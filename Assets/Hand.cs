@@ -10,35 +10,21 @@ public class Hand
     private GameObject[] cards;
     private Vector3[] cardPositions;
 
-    private Deck deck;
-    private Points pointsRef = new BriscolaPoints();
-
     private bool canTouch;
 
     // Draws cards from the deck and moves them to
     // the specified card positions.
-    public Hand(Deck deck, Vector3[] cardPositions)
+    public Hand(Deck deck, Vector3[] cardPositions, Points pointsRef)
     {
         canTouch = false;
-        this.deck = deck;
         this.cardPositions = cardPositions;
         cards = new GameObject[HAND_SIZE];
         for (int i = 0; i < cards.Length; i++)
         {
             cards[i] = deck.DrawTopCard();
             cards[i].GetComponent<Transform>().position = cardPositions[i];
-            AddCardScript(cards[i]);
+            CardFactory.AddCardScript(cards[i], pointsRef);
         }
-    }
-
-    private void AddCardScript(GameObject card)
-    {
-        Card cardScript = card.AddComponent<Card>();
-        String cardName = card.name;
-        int cardPoints = pointsRef.ToPoints(cardName);
-        cardScript.SetPoints(cardPoints);
-        cardScript.SetSymbol(cardName[0]);
-        cardScript.SetSuit(cardName[1]);
     }
 
     public void EnableTouch()

@@ -12,11 +12,14 @@ public class Game : MonoBehaviour
     private Hand playerHand;
     private Hand compHand;
 
+    private Deck deck;
+    private Points pointsRef = new BriscolaPoints();
+
     void Start()
     {
-        Deck deck = new Deck();
-        playerHand = new Hand(deck, playerCardPositions);
-        compHand = new Hand(deck, compCardPositions);
+        deck = new Deck();
+        playerHand = new Hand(deck, playerCardPositions, pointsRef);
+        compHand = new Hand(deck, compCardPositions, pointsRef);
 
         playerHand.EnableTouch();
     }
@@ -24,5 +27,8 @@ public class Game : MonoBehaviour
     void Update()
     {
         playerHand.UpdateTouch();
+
+        GameObject topCard = deck.PeekTopCard();
+        CardFactory.AddCardScript(topCard, pointsRef);
     }
 }

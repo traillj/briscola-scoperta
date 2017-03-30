@@ -35,4 +35,9 @@ public class Deck
         size--;
         return cards[size];
     }
+
+    public GameObject PeekTopCard()
+    {
+        return cards[size - 1];
+    }
 }
