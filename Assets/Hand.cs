@@ -27,6 +27,16 @@ public class Hand
         }
     }
 
+    public Card[] GetCardScripts()
+    {
+        Card[] cardScripts = new Card[cards.Length];
+        for (int i = 0; i < cards.Length; i++)
+        {
+            cardScripts[i] = cards[i].GetComponent<Card>();
+        }
+        return cardScripts;
+    }
+
     public void EnableTouch()
     {
         canTouch = true;
@@ -36,14 +46,23 @@ public class Hand
         }
     }
 
-    public void UpdateTouch()
+    // Returns false when a card has been touched,
+    // otherwise returns true.
+    public bool UpdateTouch()
     {
+        bool playerTurn = true;
         if (canTouch)
         {
             CheckMovement();
         }
+        else
+        {
+            playerTurn = false;
+        }
+        return playerTurn;
     }
 
+    // Disables touch if any card in the hand has moved
     private void CheckMovement()
     {
         for (int i = 0; i < cards.Length; i++)

@@ -40,4 +40,9 @@ public class Deck
     {
         return cards[size - 1];
     }
+
+    public GameObject PeekBottomCard()
+    {
+        return cards[0];
+    }
 }

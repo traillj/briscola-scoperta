@@ -40,6 +40,19 @@ public class Card : MonoBehaviour
         Debug.Log(symbol.ToString() + suit + " P:" + points);
     }
 
+    // For computer's cards
+    public void Move(bool downwards)
+    {
+        if (downwards)
+        {
+            playPos = new Vector3(transform.position.x, -yDistFromCentre);
+        }
+        else
+        {
+            playPos = new Vector3(transform.position.x, yDistFromCentre);
+        }
+    }
+
     public void DisableTouch()
     {
         Destroy(this.GetComponent<BoxCollider2D>());
