@@ -3,9 +3,13 @@
 
 using System.Collections;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Game : MonoBehaviour
 {
+    public Text scoreDisplay;
+    public Vector3 trumpPosition;
+
     // For positioning hands
     public Vector3[] playerCardPositions;
     public Vector3[] compCardPositions;
@@ -37,8 +41,9 @@ public class Game : MonoBehaviour
 
     private void InitBottomCard()
     {
-        GameObject bottomCard = deck.PeekBottomCard();
-        trumpSuit = bottomCard.name[1];
+        GameObject trump = deck.PeekBottomCard();
+        trumpSuit = trump.name[1];
+        trump.GetComponent<Transform>().position = trumpPosition;
     }
 
     void Update()
@@ -53,7 +58,6 @@ public class Game : MonoBehaviour
         {
             compWaiting = true;
             StartCoroutine(CompTurn());
-            trickOver = true;
         }
     }
 
@@ -68,5 +72,26 @@ public class Game : MonoBehaviour
         Card chosenCard = compStrategy.ChooseCard(compCards, playerCards,
             topCardScript, trumpSuit);
         chosenCard.Move(true);
+
+        scoreDisplay.text = GetTrickPoints(true).ToString();
+        trickOver = true;
     }
+
+    private int GetTrickPoints(bool playerMovedFirst)
+    {
+        string playerCard = playerHand.GetMovedCard().name;
+        string compCard = compHand.GetMovedCard().name;
+
+        int points;
+        if (playerMovedFirst)
+        {
+            points = pointsRef.PointsWon(playerCard, compCard, trumpSuit);
+        }
+        else
+        {
+            points = pointsRef.PointsWon(compCard, playerCard, trumpSuit);
+        }
+        return points;
+    }
+
 }

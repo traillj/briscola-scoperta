@@ -14,6 +14,7 @@ public class Card : MonoBehaviour
 
     private Vector3 playPos;
     private float speed = 7.0f;
+    private bool moved = false;
 
     public void InitInfo(int points, char symbol, char suit)
     {
@@ -35,6 +36,7 @@ public class Card : MonoBehaviour
 
     void OnMouseUp()
     {
+        moved = true;
         playPos = new Vector3(transform.position.x, yDistFromCentre);
         // Test
         Debug.Log(symbol.ToString() + suit + " P:" + points);
@@ -43,6 +45,7 @@ public class Card : MonoBehaviour
     // For computer's cards
     public void Move(bool downwards)
     {
+        moved = true;
         if (downwards)
         {
             playPos = new Vector3(transform.position.x, -yDistFromCentre);
@@ -71,5 +74,10 @@ public class Card : MonoBehaviour
     public char GetSuit()
     {
         return suit;
+    }
+
+    public bool HasMoved()
+    {
+        return moved;
     }
 }
