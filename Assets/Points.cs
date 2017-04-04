@@ -12,4 +12,7 @@ public interface Points
     // Assumes only one player can win points in the trick,
     // or only the difference is important.
     int PointsWon(string card1, string card2, char trumpSuit);
+
+    // Returns the winning card.
+    string GetWinningCard(string card1, string card2, char trumpSuit);
 }

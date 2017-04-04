@@ -88,12 +88,12 @@ public class Hand
 
     // Returns the first card found that has moved.
     // Returns null if no cards in the hand have moved.
-    public Card GetMovedCard()
+    public GameObject GetMovedCard()
     {
-        Card[] cards = GetCardScripts();
-        for (int i = 0; i < cards.Length; i++)
+        Card[] cardScripts = GetCardScripts();
+        for (int i = 0; i < cardScripts.Length; i++)
         {
-            if (cards[i].HasMoved())
+            if (cardScripts[i].HasMoved())
             {
                 return cards[i];
             }

@@ -14,6 +14,9 @@ public class Game : MonoBehaviour
     public Vector3[] playerCardPositions;
     public Vector3[] compCardPositions;
 
+    // Order in layer behind the background
+    private const int HIDDEN_ORDER = -2;
+
     private Hand playerHand;
     private Hand compHand;
     private Strategy compStrategy = new RandomStrategy();
@@ -23,11 +26,14 @@ public class Game : MonoBehaviour
     private Points pointsRef = new BriscolaPoints();
 
     private bool playerTurn = true;
-    private bool trickOver = false;
 
     // Time computer waits after player chooses a card, in seconds
     private int compWaitTime = 1;
     private bool compWaiting = false;
+
+    private int endTrickWaitTime = 2;
+    private bool trickEnding = false;
+    private bool trickWaiting = false;
 
     void Start()
     {
@@ -48,7 +54,12 @@ public class Game : MonoBehaviour
 
     void Update()
     {
-        if (trickOver)
+        if (trickEnding && !trickWaiting)
+        {
+            trickWaiting = true;
+            StartCoroutine(EndTrick());
+        }
+        if (trickEnding)
         {
             return;
         }
@@ -73,8 +84,23 @@ public class Game : MonoBehaviour
             topCardScript, trumpSuit);
         chosenCard.Move(true);
 
-        scoreDisplay.text = GetTrickPoints(true).ToString();
-        trickOver = true;
+        trickEnding = true;
+    }
+
+    private IEnumerator EndTrick()
+    {
+        yield return new WaitForSeconds(endTrickWaitTime);
+
+        GameObject playerCard = playerHand.GetMovedCard();
+        GameObject compCard = compHand.GetMovedCard();
+        playerCard.GetComponent<Renderer>().sortingOrder = HIDDEN_ORDER;
+        compCard.GetComponent<Renderer>().sortingOrder = HIDDEN_ORDER;
+
+        int trickPoints = GetTrickPoints(true);
+        scoreDisplay.text = trickPoints.ToString();
+
+        DebugWinningCard();
+        //trickEnding = false;
     }
 
     private int GetTrickPoints(bool playerMovedFirst)
@@ -92,6 +118,22 @@ public class Game : MonoBehaviour
             points = pointsRef.PointsWon(compCard, playerCard, trumpSuit);
         }
         return points;
+    }
+
+    private void DebugWinningCard()
+    {
+        string playerCard = playerHand.GetMovedCard().name;
+        string compCard = compHand.GetMovedCard().name;
+        string card = pointsRef.GetWinningCard(playerCard,
+            compCard, trumpSuit);
+        if (card == playerCard)
+        {
+            Debug.Log("WIN: " + playerCard + " " + compCard);
+        }
+        else
+        {
+            Debug.Log("LOSE: " + playerCard + " " + compCard);
+        }
     }
 
 }

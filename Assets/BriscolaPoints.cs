@@ -1,9 +1,12 @@
 ﻿// Briscola Scoperta
 // Author: traillj
 
+using System;
+
+
+// Assumes card1 was played first.
 public class BriscolaPoints : Points
 {
-
     public int ToPoints(string card)
     {
         char symbol = card[0];
@@ -54,4 +57,54 @@ public class BriscolaPoints : Points
 
         return totalPoints;
     }
+
+    public string GetWinningCard(string card1, string card2, char trumpSuit)
+    {
+        string card = GetWinningSuit(card1, card2, trumpSuit);
+        if (!String.Equals(card, ""))
+        {
+            return card;
+        }
+
+        string winningCard = card2;
+        int pointsWon = PointsWon(card1, card2, trumpSuit);
+        if (pointsWon > 0)
+        {
+            winningCard = card1;
+        }
+        else if (pointsWon == 0)
+        {
+            // Only number cards do not have point values.
+            // For zero point cards, higher numbers have higher ranks.
+            int rank1 = int.Parse(card1[0].ToString());
+            int rank2 = int.Parse(card2[0].ToString());
+            if (rank1 > rank2)
+            {
+                winningCard = card1;
+            }
+        }
+
+        return winningCard;
+    }
+
+    // Returns the card of the winning suit.
+    // If the suits are the same, "" is returned.
+    private string GetWinningSuit(string card1, string card2, char trumpSuit)
+    {
+        string winningCard = card1;
+        char suit1 = card1[1];
+        char suit2 = card2[1];
+
+        if (suit1 == suit2)
+        {
+            winningCard = "";
+        }
+        if (suit2 == trumpSuit)
+        {
+            winningCard = card2;
+        }
+
+        return winningCard;
+    }
+
 }
