@@ -99,7 +99,9 @@ public class Game : MonoBehaviour
         int trickPoints = GetTrickPoints(true);
         scoreDisplay.text = trickPoints.ToString();
 
-        DebugWinningCard();
+        bool playerWon = DidPlayerWin();
+        DealCardEach(playerWon);
+
         //trickEnding = false;
     }
 
@@ -120,7 +122,7 @@ public class Game : MonoBehaviour
         return points;
     }
 
-    private void DebugWinningCard()
+    private bool DidPlayerWin()
     {
         string playerCard = playerHand.GetMovedCard().name;
         string compCard = compHand.GetMovedCard().name;
@@ -129,10 +131,25 @@ public class Game : MonoBehaviour
         if (card == playerCard)
         {
             Debug.Log("WIN: " + playerCard + " " + compCard);
+            return true;
+        }
+
+        Debug.Log("LOSE: " + playerCard + " " + compCard);
+        return false;
+    }
+
+    // Trick winner draws first
+    private void DealCardEach(bool playerWon)
+    {
+        if (playerWon)
+        {
+            playerHand.AddCard(deck, pointsRef);
+            compHand.AddCard(deck, pointsRef);
         }
         else
         {
-            Debug.Log("LOSE: " + playerCard + " " + compCard);
+            compHand.AddCard(deck, pointsRef);
+            playerHand.AddCard(deck, pointsRef);
         }
     }
 

@@ -21,9 +21,7 @@ public class Hand
         cards = new GameObject[HAND_SIZE];
         for (int i = 0; i < cards.Length; i++)
         {
-            cards[i] = deck.DrawTopCard();
-            cards[i].GetComponent<Transform>().position = cardPositions[i];
-            CardFactory.AddCardScript(cards[i], pointsRef);
+            AddCard(deck, pointsRef, i);
         }
     }
 
@@ -99,6 +97,47 @@ public class Hand
             }
         }
         return null;
+    }
+
+    // Returns true if a card was added to the hand,
+    // false otherwise.
+    public bool AddCard(Deck deck, Points pointsRef)
+    {
+        RemoveMovedCard();
+        for (int i = 0; i < cards.Length; i++)
+        {
+            if (cards[i] == null)
+            {
+                AddCard(deck, pointsRef, i);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    // pos = Position of the card from the left, left most is at pos 0.
+    private void AddCard(Deck deck, Points pointsRef, int pos)
+    {
+        cards[pos] = deck.DrawTopCard();
+        cards[pos].GetComponent<Transform>().position = cardPositions[pos];
+        CardFactory.AddCardScript(cards[pos], pointsRef);
+    }
+
+    // Returns true if a card was removed,
+    // false otherwise.
+    private bool RemoveMovedCard()
+    {
+        Card[] cardScripts = GetCardScripts();
+        for (int i = 0; i < cardScripts.Length; i++)
+        {
+            if (cardScripts[i].HasMoved())
+            {
+                cards[i] = null;
+                cardScripts[i] = null;
+                return true;
+            }
+        }
+        return false;
     }
 
 }
