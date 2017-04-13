@@ -38,8 +38,6 @@ public class Card : MonoBehaviour
     {
         moved = true;
         playPos = new Vector3(transform.position.x, yDistFromCentre);
-        // Test
-        Debug.Log(symbol.ToString() + suit + " P:" + points);
     }
 
     // For computer's cards

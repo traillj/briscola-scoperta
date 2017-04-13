@@ -56,6 +56,7 @@ public class Game : MonoBehaviour
     {
         if (trickEnding && !trickWaiting)
         {
+            compWaiting = false;
             trickWaiting = true;
             StartCoroutine(EndTrick());
         }
@@ -97,12 +98,15 @@ public class Game : MonoBehaviour
         compCard.GetComponent<Renderer>().sortingOrder = HIDDEN_ORDER;
 
         int trickPoints = GetTrickPoints(true);
-        scoreDisplay.text = trickPoints.ToString();
+        int newScore = int.Parse(scoreDisplay.text) + trickPoints;
+        scoreDisplay.text = newScore.ToString();
 
         bool playerWon = DidPlayerWin();
         DealCardEach(playerWon);
 
-        //trickEnding = false;
+        playerHand.EnableTouch();
+        trickWaiting = false;
+        trickEnding = false;
     }
 
     private int GetTrickPoints(bool playerMovedFirst)
@@ -130,11 +134,11 @@ public class Game : MonoBehaviour
             compCard, trumpSuit);
         if (card == playerCard)
         {
-            Debug.Log("WIN: " + playerCard + " " + compCard);
+            Debug.Log("WIN  " + playerCard + " " + compCard);
             return true;
         }
 
-        Debug.Log("LOSE: " + playerCard + " " + compCard);
+        Debug.Log("LOSE " + playerCard + " " + compCard);
         return false;
     }
 

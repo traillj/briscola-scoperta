@@ -88,15 +88,28 @@ public class Hand
     // Returns null if no cards in the hand have moved.
     public GameObject GetMovedCard()
     {
+        GameObject movedCard = null;
+        int i = GetMovedCardIndex();
+        if (i >= 0)
+        {
+            movedCard = cards[i];
+        }
+        return movedCard;
+    }
+
+    // Returns the index of the moved card.
+    // If no cards have moved, returns -1.
+    private int GetMovedCardIndex()
+    {
         Card[] cardScripts = GetCardScripts();
         for (int i = 0; i < cardScripts.Length; i++)
         {
             if (cardScripts[i].HasMoved())
             {
-                return cards[i];
+                return i;
             }
         }
-        return null;
+        return -1;
     }
 
     // Returns true if a card was added to the hand,
@@ -127,17 +140,14 @@ public class Hand
     // false otherwise.
     private bool RemoveMovedCard()
     {
-        Card[] cardScripts = GetCardScripts();
-        for (int i = 0; i < cardScripts.Length; i++)
+        bool cardRemoved = false;
+        int i = GetMovedCardIndex();
+        if (i >= 0)
         {
-            if (cardScripts[i].HasMoved())
-            {
-                cards[i] = null;
-                cardScripts[i] = null;
-                return true;
-            }
+            cards[i] = null;
+            cardRemoved = true;
         }
-        return false;
+        return cardRemoved;
     }
 
 }
