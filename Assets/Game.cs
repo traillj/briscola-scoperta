@@ -25,15 +25,26 @@ public class Game : MonoBehaviour
     private char trumpSuit;
     private Points pointsRef = new BriscolaPoints();
 
-    private bool playerTurn = true;
-
     // Time computer waits after player chooses a card, in seconds
     private int compWaitTime = 1;
-    private bool compWaiting = false;
-
+    // Wait time after trick ends, in seconds
     private int endTrickWaitTime = 2;
-    private bool trickEnding = false;
-    private bool trickWaiting = false;
+
+    enum Turn
+    {
+        Unstarted,
+        Start,
+        Currently,
+        Finish,
+        Ended
+    };
+
+    private Turn playerState = Turn.Unstarted;
+    private Turn compState = Turn.Start;
+    private Turn refState = Turn.Unstarted;
+
+    private bool playerTurn = false;
+    private bool playerFirst = false;
 
     void Start()
     {
@@ -41,8 +52,6 @@ public class Game : MonoBehaviour
         playerHand = new Hand(deck, playerCardPositions, pointsRef);
         compHand = new Hand(deck, compCardPositions, pointsRef);
         InitBottomCard();
-
-        playerHand.EnableTouch();
     }
 
     private void InitBottomCard()
@@ -54,22 +63,68 @@ public class Game : MonoBehaviour
 
     void Update()
     {
-        if (trickEnding && !trickWaiting)
+        CheckPlayerTurn();
+        CheckCompTurn();
+        CheckRefTurn();
+    }
+
+    private void CheckPlayerTurn()
+    {
+        if (playerState == Turn.Start)
         {
-            compWaiting = false;
-            trickWaiting = true;
-            StartCoroutine(EndTrick());
-        }
-        if (trickEnding)
-        {
-            return;
+            playerState = Turn.Currently;
+            playerHand.EnableTouch();
         }
 
-        playerTurn = playerHand.UpdateTouch();
-        if (!playerTurn && !compWaiting)
+        if (playerState == Turn.Currently)
         {
-            compWaiting = true;
+            playerTurn = playerHand.UpdateTouch();
+            if (!playerTurn)
+            {
+                playerState = Turn.Ended;
+                if (compState == Turn.Unstarted)
+                {
+                    compState = Turn.Start;
+                }
+                else
+                {
+                    refState = Turn.Start;
+                }
+            }
+        }
+    }
+
+    private void CheckCompTurn()
+    {
+        if (compState == Turn.Start)
+        {
+            compState = Turn.Currently;
             StartCoroutine(CompTurn());
+        }
+        else if (compState == Turn.Finish)
+        {
+            compState = Turn.Ended;
+            if (playerState == Turn.Unstarted)
+            {
+                playerState = Turn.Start;
+            }
+            else
+            {
+                refState = Turn.Start;
+            }
+        }
+    }
+
+    private void CheckRefTurn()
+    {
+        if (refState == Turn.Start)
+        {
+            refState = Turn.Currently;
+            StartCoroutine(EndTrick());
+        }
+        else if (refState == Turn.Finish)
+        {
+            refState = Turn.Unstarted;
         }
     }
 
@@ -85,43 +140,46 @@ public class Game : MonoBehaviour
             topCardScript, trumpSuit);
         chosenCard.Move(true);
 
-        trickEnding = true;
+        compState = Turn.Finish;
     }
 
     private IEnumerator EndTrick()
     {
         yield return new WaitForSeconds(endTrickWaitTime);
+        HideMovedCards();
 
-        GameObject playerCard = playerHand.GetMovedCard();
-        GameObject compCard = compHand.GetMovedCard();
-        playerCard.GetComponent<Renderer>().sortingOrder = HIDDEN_ORDER;
-        compCard.GetComponent<Renderer>().sortingOrder = HIDDEN_ORDER;
-
-        int trickPoints = GetTrickPoints(true);
+        int trickPoints = GetTrickPoints();
         int newScore = int.Parse(scoreDisplay.text) + trickPoints;
         scoreDisplay.text = newScore.ToString();
 
         bool playerWon = DidPlayerWin();
         DealCardEach(playerWon);
+        SetTurnOrder(playerWon);
 
-        playerHand.EnableTouch();
-        trickWaiting = false;
-        trickEnding = false;
+        refState = Turn.Finish;
     }
 
-    private int GetTrickPoints(bool playerMovedFirst)
+    private void HideMovedCards()
+    {
+        GameObject playerCard = playerHand.GetMovedCard();
+        GameObject compCard = compHand.GetMovedCard();
+        playerCard.GetComponent<Renderer>().sortingOrder = HIDDEN_ORDER;
+        compCard.GetComponent<Renderer>().sortingOrder = HIDDEN_ORDER;
+    }
+
+    private int GetTrickPoints()
     {
         string playerCard = playerHand.GetMovedCard().name;
         string compCard = compHand.GetMovedCard().name;
 
         int points;
-        if (playerMovedFirst)
+        if (playerFirst)
         {
             points = pointsRef.PointsWon(playerCard, compCard, trumpSuit);
         }
         else
         {
-            points = pointsRef.PointsWon(compCard, playerCard, trumpSuit);
+            points = -pointsRef.PointsWon(compCard, playerCard, trumpSuit);
         }
         return points;
     }
@@ -130,14 +188,27 @@ public class Game : MonoBehaviour
     {
         string playerCard = playerHand.GetMovedCard().name;
         string compCard = compHand.GetMovedCard().name;
-        string card = pointsRef.GetWinningCard(playerCard,
-            compCard, trumpSuit);
+        string card;
+
+        if (playerFirst)
+        {
+            card = pointsRef.GetWinningCard(playerCard,
+                compCard, trumpSuit);
+        }
+        else
+        {
+            card = pointsRef.GetWinningCard(compCard,
+                playerCard, trumpSuit);
+        }
+
         if (card == playerCard)
         {
+            playerFirst = true;
             Debug.Log("WIN  " + playerCard + " " + compCard);
             return true;
         }
 
+        playerFirst = false;
         Debug.Log("LOSE " + playerCard + " " + compCard);
         return false;
     }
@@ -154,6 +225,21 @@ public class Game : MonoBehaviour
         {
             compHand.AddCard(deck, pointsRef);
             playerHand.AddCard(deck, pointsRef);
+        }
+    }
+
+    // Trick winner plays first
+    private void SetTurnOrder(bool playerWon)
+    {
+        if (playerWon)
+        {
+            playerState = Turn.Start;
+            compState = Turn.Unstarted;
+        }
+        else
+        {
+            playerState = Turn.Unstarted;
+            compState = Turn.Start;
         }
     }
 
