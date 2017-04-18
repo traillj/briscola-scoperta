@@ -1,6 +1,7 @@
 ﻿// Briscola Scoperta
 // Author: traillj
 
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
@@ -201,7 +202,7 @@ public class Game : MonoBehaviour
                 playerCard, trumpSuit);
         }
 
-        if (card == playerCard)
+        if (String.Equals(card, playerCard))
         {
             playerFirst = true;
             Debug.Log("WIN  " + playerCard + " " + compCard);

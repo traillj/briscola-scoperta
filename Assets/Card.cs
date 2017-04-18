@@ -10,10 +10,8 @@ public class Card : MonoBehaviour
     private char suit;
 
     // The position to place the card chosen in the trick
-    private const float yDistFromCentre = -0.7f;
+    private const float yPlayPos = -0.7f;
 
-    private Vector3 playPos;
-    private float speed = 7.0f;
     private bool moved = false;
 
     public void InitInfo(int points, char symbol, char suit)
@@ -23,35 +21,23 @@ public class Card : MonoBehaviour
         this.suit = suit;
     }
 
-    void Start()
-    {
-        playPos = transform.position;
-    }
-
-    void Update()
-    {
-        transform.position = Vector3.MoveTowards(transform.position,
-            playPos, Time.deltaTime * speed);
-    }
-
+    // Moves the card to the play position instantly.
     void OnMouseUp()
     {
         moved = true;
-        playPos = new Vector3(transform.position.x, yDistFromCentre);
+        transform.position = new Vector3(transform.position.x, yPlayPos);
     }
 
-    // For computer's cards
-    public void Move(bool downwards)
+    // Moves the card to the play position instantly.
+    public void Move(bool fromTop)
     {
         moved = true;
-        if (downwards)
+        float newY = yPlayPos;
+        if (fromTop)
         {
-            playPos = new Vector3(transform.position.x, -yDistFromCentre);
+            newY *= -1;
         }
-        else
-        {
-            playPos = new Vector3(transform.position.x, yDistFromCentre);
-        }
+        transform.position = new Vector3(transform.position.x, newY);
     }
 
     public void DisableTouch()

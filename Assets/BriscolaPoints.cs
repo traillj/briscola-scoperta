@@ -99,7 +99,7 @@ public class BriscolaPoints : Points
         {
             winningCard = "";
         }
-        if (suit2 == trumpSuit)
+        else if (suit2 == trumpSuit)
         {
             winningCard = card2;
         }
