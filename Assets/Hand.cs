@@ -7,8 +7,14 @@ using UnityEngine;
 public class Hand
 {
     private const int HAND_SIZE = 3;
+
+    // Some indexes may be null
     private GameObject[] cards;
+
     private Vector3[] cardPositions;
+
+    // Number of cards currently in hand.
+    private int numCards = 0;
 
     private bool canTouch;
 
@@ -25,12 +31,18 @@ public class Hand
         }
     }
 
+    // Returns the card scripts ignoring indexes without cards.
     public Card[] GetCardScripts()
     {
-        Card[] cardScripts = new Card[cards.Length];
+        Card[] cardScripts = new Card[numCards];
+        int j = 0;
         for (int i = 0; i < cards.Length; i++)
         {
-            cardScripts[i] = cards[i].GetComponent<Card>();
+            if (cards[i] != null)
+            {
+                cardScripts[j] = cards[i].GetComponent<Card>();
+                j++;
+            }
         }
         return cardScripts;
     }
@@ -40,7 +52,10 @@ public class Hand
         canTouch = true;
         for (int i = 0; i < cards.Length; i++)
         {
-            cards[i].AddComponent<BoxCollider2D>();
+            if (cards[i] != null)
+            {
+                cards[i].AddComponent<BoxCollider2D>();
+            }
         }
     }
 
@@ -65,7 +80,7 @@ public class Hand
     {
         for (int i = 0; i < cards.Length; i++)
         {
-            if (Math.Abs(cards[i].transform.position.y
+            if (cards[i] != null && Math.Abs(cards[i].transform.position.y
                 - cardPositions[i].y) > 0.1)
             {
                 DisableTouch();
@@ -79,8 +94,11 @@ public class Hand
         canTouch = false;
         for (int i = 0; i < cards.Length; i++)
         {
-            Card card = cards[i].GetComponent<Card>();
-            card.DisableTouch();
+            if (cards[i] != null)
+            {
+                Card card = cards[i].GetComponent<Card>();
+                card.DisableTouch();
+            }
         }
     }
 
@@ -98,15 +116,21 @@ public class Hand
     }
 
     // Returns the index of the moved card.
+    // This index considers indexes with no cards.
     // If no cards have moved, returns -1.
     private int GetMovedCardIndex()
     {
         Card[] cardScripts = GetCardScripts();
-        for (int i = 0; i < cardScripts.Length; i++)
+        int j = 0;
+        for (int i = 0; i < cards.Length; i++)
         {
-            if (cardScripts[i].HasMoved())
+            if (cards[i] != null)
             {
-                return i;
+                if (cardScripts[j].HasMoved())
+                {
+                    return i;
+                }
+                j++;
             }
         }
         return -1;
@@ -116,7 +140,6 @@ public class Hand
     // false otherwise.
     public bool AddCard(Deck deck, Points pointsRef)
     {
-        RemoveMovedCard();
         for (int i = 0; i < cards.Length; i++)
         {
             if (cards[i] == null)
@@ -131,6 +154,7 @@ public class Hand
     // pos = Position of the card from the left, left most is at pos 0.
     private void AddCard(Deck deck, Points pointsRef, int pos)
     {
+        numCards++;
         cards[pos] = deck.DrawTopCard();
         cards[pos].GetComponent<Transform>().position = cardPositions[pos];
         CardFactory.AddCardScript(cards[pos], pointsRef);
@@ -138,16 +162,21 @@ public class Hand
 
     // Returns true if a card was removed,
     // false otherwise.
-    private bool RemoveMovedCard()
+    public bool RemoveMovedCard()
     {
         bool cardRemoved = false;
         int i = GetMovedCardIndex();
         if (i >= 0)
         {
             cards[i] = null;
+            numCards--;
             cardRemoved = true;
         }
         return cardRemoved;
     }
 
+    public bool IsEmpty()
+    {
+        return (numCards == 0);
+    }
 }

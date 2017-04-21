@@ -133,7 +133,11 @@ public class Game : MonoBehaviour
     {
         yield return new WaitForSeconds(compWaitTime);
         GameObject topCard = deck.PeekTopCard();
-        Card topCardScript = CardFactory.AddCardScript(topCard, pointsRef);
+        Card topCardScript = null;
+        if (topCard != null)
+        {
+            topCardScript = CardFactory.AddCardScript(topCard, pointsRef);
+        }
         Card[] compCards = compHand.GetCardScripts();
         Card[] playerCards = playerHand.GetCardScripts();
 
@@ -147,25 +151,34 @@ public class Game : MonoBehaviour
     private IEnumerator EndTrick()
     {
         yield return new WaitForSeconds(endTrickWaitTime);
-        HideMovedCards();
 
         int trickPoints = GetTrickPoints();
         int newScore = int.Parse(scoreDisplay.text) + trickPoints;
         scoreDisplay.text = newScore.ToString();
 
         bool playerWon = DidPlayerWin();
-        DealCardEach(playerWon);
-        SetTurnOrder(playerWon);
+        HideMovedCards();
+        if (!deck.IsEmpty())
+        {
+            DealCardEach(playerWon);
+        }
 
-        refState = Turn.Finish;
+        if (!playerHand.IsEmpty())
+        {
+            SetTurnOrder(playerWon);
+            refState = Turn.Finish;
+        }
     }
 
+    // Removes the moved cards from the player's hands
     private void HideMovedCards()
     {
         GameObject playerCard = playerHand.GetMovedCard();
         GameObject compCard = compHand.GetMovedCard();
         playerCard.GetComponent<Renderer>().sortingOrder = HIDDEN_ORDER;
         compCard.GetComponent<Renderer>().sortingOrder = HIDDEN_ORDER;
+        playerHand.RemoveMovedCard();
+        compHand.RemoveMovedCard();
     }
 
     private int GetTrickPoints()

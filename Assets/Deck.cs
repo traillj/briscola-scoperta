@@ -38,11 +38,21 @@ public class Deck
 
     public GameObject PeekTopCard()
     {
-        return cards[size - 1];
+        GameObject topCard = null;
+        if (!IsEmpty())
+        {
+            topCard = cards[size - 1];
+        }
+        return topCard;
     }
 
     public GameObject PeekBottomCard()
     {
         return cards[0];
+    }
+
+    public bool IsEmpty()
+    {
+        return (size <= 0);
     }
 }
