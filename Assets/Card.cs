@@ -64,4 +64,9 @@ public class Card : MonoBehaviour
     {
         return moved;
     }
+
+    public void SetMoved(bool moved)
+    {
+        this.moved = moved;
+    }
 }

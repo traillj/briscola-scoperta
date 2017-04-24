@@ -12,6 +12,7 @@ public class CardFactory
 
         Card cardScript = card.AddComponent<Card>();
         cardScript.InitInfo(cardPoints, cardName[0], cardName[1]);
+        cardScript.SetMoved(false);
         return cardScript;
     }
 }

@@ -6,11 +6,14 @@ using UnityEngine;
 public class Deck
 {
     private GameObject[] cards;
-    private int size = 40;
 
-    public Deck()
+    // Initial number of cards in the deck
+    private int size;
+
+    public Deck(GameObject[] cards)
     {
-        cards = GameObject.FindGameObjectsWithTag("Card");
+        this.cards = cards;
+        this.size = cards.Length;
         ShuffleCards();
     }
 

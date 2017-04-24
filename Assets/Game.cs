@@ -15,8 +15,11 @@ public class Game : MonoBehaviour
     public Vector3[] playerCardPositions;
     public Vector3[] compCardPositions;
 
+    public Vector3 deckPos;
+
     // Order in layer behind the background
-    private const int HIDDEN_ORDER = -2;
+    private const int HIDDEN_ORDER = -3;
+    private const int MIN_VISIBLE_ORDER = -1;
 
     private Hand playerHand;
     private Hand compHand;
@@ -40,19 +43,43 @@ public class Game : MonoBehaviour
         Ended
     };
 
-    private Turn playerState = Turn.Unstarted;
-    private Turn compState = Turn.Start;
-    private Turn refState = Turn.Unstarted;
+    private Turn playerState;
+    private Turn compState;
+    private Turn refState;
 
-    private bool playerTurn = false;
-    private bool playerFirst = false;
+    private bool playerTurn;
+    private bool playerFirst;
 
     void Start()
     {
-        deck = new Deck();
+        StopAllCoroutines();
+        InitStates();
+        GameObject[] cards = GameObject.FindGameObjectsWithTag("Card");
+        InitDeckPos(cards);
+        deck = new Deck(cards);
+
         playerHand = new Hand(deck, playerCardPositions, pointsRef);
         compHand = new Hand(deck, compCardPositions, pointsRef);
         InitBottomCard();
+        scoreDisplay.text = "0";
+    }
+
+    private void InitStates()
+    {
+        playerState = Turn.Unstarted;
+        compState = Turn.Start;
+        refState = Turn.Unstarted;
+        playerTurn = false;
+        playerFirst = false;
+    }
+
+    private void InitDeckPos(GameObject[] cards)
+    {
+        for (int i = 0; i < cards.Length; i++)
+        {
+            Transform transform = cards[i].GetComponent<Transform>();
+            transform.position = new Vector3(deckPos.x, deckPos.y);
+        }
     }
 
     private void InitBottomCard()
@@ -85,6 +112,7 @@ public class Game : MonoBehaviour
                 playerState = Turn.Ended;
                 if (compState == Turn.Unstarted)
                 {
+                    MoveToMinOrder(playerHand.GetMovedCard());
                     compState = Turn.Start;
                 }
                 else
@@ -107,6 +135,7 @@ public class Game : MonoBehaviour
             compState = Turn.Ended;
             if (playerState == Turn.Unstarted)
             {
+                MoveToMinOrder(compHand.GetMovedCard());
                 playerState = Turn.Start;
             }
             else
@@ -129,9 +158,15 @@ public class Game : MonoBehaviour
         }
     }
 
+    private void MoveToMinOrder(GameObject card)
+    {
+        card.GetComponent<Renderer>().sortingOrder = MIN_VISIBLE_ORDER;
+    }
+
     private IEnumerator CompTurn()
     {
         yield return new WaitForSeconds(compWaitTime);
+
         GameObject topCard = deck.PeekTopCard();
         Card topCardScript = null;
         if (topCard != null)
@@ -166,8 +201,8 @@ public class Game : MonoBehaviour
         if (!playerHand.IsEmpty())
         {
             SetTurnOrder(playerWon);
-            refState = Turn.Finish;
         }
+        refState = Turn.Finish;
     }
 
     // Removes the moved cards from the player's hands
@@ -257,4 +292,8 @@ public class Game : MonoBehaviour
         }
     }
 
+    public void Restart()
+    {
+        Start();
+    }
 }
