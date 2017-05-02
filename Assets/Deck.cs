@@ -7,19 +7,19 @@ public class Deck
 {
     private GameObject[] cards;
 
-    // Initial number of cards in the deck
+    // Number of cards currently in the deck
     private int size;
 
     public Deck(GameObject[] cards)
     {
         this.cards = cards;
         this.size = cards.Length;
-        ShuffleCards();
+        Shuffle();
     }
 
     // Shuffles the cards by sorting randomly and
     // reassigning the layer order of each card.
-    private void ShuffleCards()
+    private void Shuffle()
     {
         System.Array.Sort(cards, RandomSort);
         for (int i = 0; i < cards.Length; i++)

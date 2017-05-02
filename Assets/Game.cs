@@ -20,11 +20,13 @@ public class Game : MonoBehaviour
     // Order in layer behind the background
     private const int HIDDEN_ORDER = -3;
     private const int MIN_VISIBLE_ORDER = -1;
+    private const string CARD_TAG = "Card";
 
     private Hand playerHand;
     private Hand compHand;
     private Strategy compStrategy = new RandomStrategy();
 
+    private GameObject[] cards;
     private Deck deck;
     private char trumpSuit;
     private Points pointsRef = new BriscolaPoints();
@@ -52,11 +54,21 @@ public class Game : MonoBehaviour
 
     void Start()
     {
+        cards = GameObject.FindGameObjectsWithTag(CARD_TAG);
+        CardFactory.AddCardScripts(cards, pointsRef);
+        NewGame();
+    }
+
+    private void NewGame()
+    {
+        // Reset previous game state
         StopAllCoroutines();
         InitStates();
-        GameObject[] cards = GameObject.FindGameObjectsWithTag("Card");
-        InitDeckPos(cards);
+        InitDeckPos();
+
+        // Before deal hand
         deck = new Deck(cards);
+        ResetCardScripts();
 
         playerHand = new Hand(deck, playerCardPositions, pointsRef);
         compHand = new Hand(deck, compCardPositions, pointsRef);
@@ -73,12 +85,22 @@ public class Game : MonoBehaviour
         playerFirst = false;
     }
 
-    private void InitDeckPos(GameObject[] cards)
+    private void InitDeckPos()
     {
         for (int i = 0; i < cards.Length; i++)
         {
             Transform transform = cards[i].GetComponent<Transform>();
             transform.position = new Vector3(deckPos.x, deckPos.y);
+        }
+    }
+
+    private void ResetCardScripts()
+    {
+        for (int i = 0; i < cards.Length; i++)
+        {
+            Card cardScript = cards[i].GetComponent<Card>();
+            cardScript.DisableTouch();
+            cardScript.SetMoved(false);
         }
     }
 
@@ -171,7 +193,7 @@ public class Game : MonoBehaviour
         Card topCardScript = null;
         if (topCard != null)
         {
-            topCardScript = CardFactory.AddCardScript(topCard, pointsRef);
+            topCardScript = topCard.GetComponent<Card>();
         }
         Card[] compCards = compHand.GetCardScripts();
         Card[] playerCards = playerHand.GetCardScripts();
@@ -294,6 +316,6 @@ public class Game : MonoBehaviour
 
     public void Restart()
     {
-        Start();
+        NewGame();
     }
 }

@@ -96,8 +96,8 @@ public class Hand
         {
             if (cards[i] != null)
             {
-                Card card = cards[i].GetComponent<Card>();
-                card.DisableTouch();
+                Card cardScript = cards[i].GetComponent<Card>();
+                cardScript.DisableTouch();
             }
         }
     }
@@ -157,7 +157,6 @@ public class Hand
         numCards++;
         cards[pos] = deck.DrawTopCard();
         cards[pos].GetComponent<Transform>().position = cardPositions[pos];
-        CardFactory.AddCardScript(cards[pos], pointsRef);
     }
 
     // Returns true if a card was removed,
