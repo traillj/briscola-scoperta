@@ -94,12 +94,14 @@ public class Game : MonoBehaviour
         }
     }
 
+    // Resets cards in the player's hand to
+    // the default.
     private void ResetCardScripts()
     {
         for (int i = 0; i < cards.Length; i++)
         {
             Card cardScript = cards[i].GetComponent<Card>();
-            cardScript.DisableTouch();
+            cardScript.SetClickable(false);
             cardScript.SetMoved(false);
         }
     }
@@ -198,11 +200,29 @@ public class Game : MonoBehaviour
         Card[] compCards = compHand.GetCardScripts();
         Card[] playerCards = playerHand.GetCardScripts();
 
-        Card chosenCard = compStrategy.ChooseCard(compCards, playerCards,
-            topCardScript, trumpSuit);
+        Card chosenCard = UseStrategy(compCards, playerCards, topCardScript);
         chosenCard.Move(true);
 
         compState = Turn.Finish;
+    }
+
+    private Card UseStrategy(Card[] compCards, Card[] playerCards,
+        Card topCardScript)
+    {
+        Card chosenCard;
+        GameObject playedCard = playerHand.GetMovedCard();
+        if (playedCard != null)
+        {
+            Card playedCardScript = playedCard.GetComponent<Card>();
+            chosenCard = compStrategy.ChooseCard(compCards, playerCards,
+                topCardScript, trumpSuit, playedCardScript);
+        }
+        else
+        {
+            chosenCard = compStrategy.ChooseCard(compCards, playerCards,
+                topCardScript, trumpSuit);
+        }
+        return chosenCard;
     }
 
     private IEnumerator EndTrick()

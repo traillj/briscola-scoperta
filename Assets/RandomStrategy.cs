@@ -12,4 +12,10 @@ public class RandomStrategy : Strategy
         int randNum = rand.Next(0, compCards.Length);
         return compCards[randNum];
     }
+
+    public Card ChooseCard(Card[] compCards, Card[] opponentCards,
+        Card topCard, char trumpSuit, Card playedCard)
+    {
+        return ChooseCard(compCards, opponentCards, topCard, trumpSuit);
+    }
 }

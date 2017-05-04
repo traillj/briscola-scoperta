@@ -13,6 +13,7 @@ public class Card : MonoBehaviour
     private const float yPlayPos = -0.7f;
 
     private bool moved = false;
+    private bool clickable = false;
 
     public void InitInfo(int points, char symbol, char suit)
     {
@@ -24,8 +25,11 @@ public class Card : MonoBehaviour
     // Moves the card to the play position instantly.
     void OnMouseUp()
     {
-        moved = true;
-        transform.position = new Vector3(transform.position.x, yPlayPos);
+        if (clickable)
+        {
+            moved = true;
+            transform.position = new Vector3(transform.position.x, yPlayPos);
+        }
     }
 
     // Moves the card to the play position instantly.
@@ -38,11 +42,6 @@ public class Card : MonoBehaviour
             newY *= -1;
         }
         transform.position = new Vector3(transform.position.x, newY);
-    }
-
-    public void DisableTouch()
-    {
-        Destroy(this.GetComponent<BoxCollider2D>());
     }
 
     public int GetPoints()
@@ -68,5 +67,10 @@ public class Card : MonoBehaviour
     public void SetMoved(bool moved)
     {
         this.moved = moved;
+    }
+
+    public void SetClickable(bool clickable)
+    {
+        this.clickable = clickable;
     }
 }

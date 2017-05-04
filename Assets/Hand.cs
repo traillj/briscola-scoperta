@@ -54,7 +54,8 @@ public class Hand
         {
             if (cards[i] != null)
             {
-                cards[i].AddComponent<BoxCollider2D>();
+                Card cardScript = cards[i].GetComponent<Card>();
+                cardScript.SetClickable(true);
             }
         }
     }
@@ -97,7 +98,7 @@ public class Hand
             if (cards[i] != null)
             {
                 Card cardScript = cards[i].GetComponent<Card>();
-                cardScript.DisableTouch();
+                cardScript.SetClickable(false);
             }
         }
     }
