@@ -6,36 +6,55 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
+// Acts as referee in game. Keeps track of the current
+// game state and updates the game accordingly.
+// Controls all objects on the main scene. 
+// Starts and can restart the game.
 public class Game : MonoBehaviour
 {
-    public Text scoreDisplay;
-    public Vector3 trumpPosition;
-
-    // For positioning hands
-    public Vector3[] playerCardPositions;
-    public Vector3[] compCardPositions;
-
-    public Vector3 deckPos;
-
     // Order in layer behind the background
     private const int HIDDEN_ORDER = -3;
+    // Minimum order visible
     private const int MIN_VISIBLE_ORDER = -1;
+
+    // Tag to access all card objects
     private const string CARD_TAG = "Card";
 
-    private Hand playerHand;
-    private Hand compHand;
-    private Strategy compStrategy = new RandomStrategy();
+    // Position of the trump card
+    public Vector3 trumpPosition;
+    // Position of cards in hands
+    public Vector3[] playerCardPositions;
+    public Vector3[] compCardPositions;
+    // Position of the deck
+    public Vector3 deckPos;
 
+    // The current score differential
+    public Text scoreDisplay;
+
+    // Contains the card objects currently in the player's hand
+    private Hand playerHand;
+    // Contains the card objects currently in the computer's hand
+    private Hand compHand;
+
+    // All cards
     private GameObject[] cards;
+    // Contains all undrawn cards
     private Deck deck;
+    // The suit of the trump card
     private char trumpSuit;
+
+    // The referee that determines the points won in a trick
     private Points pointsRef = new BriscolaPoints();
+
+    // The computer's card choosing strategy 
+    private Strategy compStrategy = new RandomStrategy();
 
     // Time computer waits after player chooses a card, in seconds
     private int compWaitTime = 1;
     // Wait time after trick ends, in seconds
     private int endTrickWaitTime = 2;
 
+    // Type to store state of the game
     enum Turn
     {
         Unstarted,
@@ -45,13 +64,16 @@ public class Game : MonoBehaviour
         Ended
     };
 
+    // State of the players and referee
     private Turn playerState;
     private Turn compState;
     private Turn refState;
 
-    private bool playerTurn;
+    // True if the player had the first move of the game
     private bool playerFirst;
 
+
+    // Initialises the game.
     void Start()
     {
         cards = GameObject.FindGameObjectsWithTag(CARD_TAG);
@@ -59,6 +81,7 @@ public class Game : MonoBehaviour
         NewGame();
     }
 
+    // Resets the state, card scripts, deck, hands and score.
     private void NewGame()
     {
         // Reset previous game state
@@ -72,19 +95,20 @@ public class Game : MonoBehaviour
 
         playerHand = new Hand(deck, playerCardPositions, pointsRef);
         compHand = new Hand(deck, compCardPositions, pointsRef);
-        InitBottomCard();
+        InitTrumpCard();
         scoreDisplay.text = "0";
     }
 
+    // Initialises the states of the players and referee.
     private void InitStates()
     {
         playerState = Turn.Unstarted;
         compState = Turn.Start;
         refState = Turn.Unstarted;
-        playerTurn = false;
         playerFirst = false;
     }
 
+    // Initialises the position of the deck.
     private void InitDeckPos()
     {
         for (int i = 0; i < cards.Length; i++)
@@ -94,8 +118,7 @@ public class Game : MonoBehaviour
         }
     }
 
-    // Resets cards in the player's hand to
-    // the default.
+    // Resets cards in the player's hand to the default.
     private void ResetCardScripts()
     {
         for (int i = 0; i < cards.Length; i++)
@@ -106,13 +129,16 @@ public class Game : MonoBehaviour
         }
     }
 
-    private void InitBottomCard()
+    // Initialises the trump card's position and suit information.
+    private void InitTrumpCard()
     {
         GameObject trump = deck.PeekBottomCard();
         trumpSuit = trump.name[1];
         trump.GetComponent<Transform>().position = trumpPosition;
     }
 
+
+    // Updates the game according to the current state.
     void Update()
     {
         CheckPlayerTurn();
@@ -120,6 +146,10 @@ public class Game : MonoBehaviour
         CheckRefTurn();
     }
 
+    // If the player's state is
+    //   Start - Enable touch on the player's hand
+    //   Currently - Determine whether a card has been chosen
+    //               and update the states if true.
     private void CheckPlayerTurn()
     {
         if (playerState == Turn.Start)
@@ -130,7 +160,7 @@ public class Game : MonoBehaviour
 
         if (playerState == Turn.Currently)
         {
-            playerTurn = playerHand.UpdateTouch();
+            bool playerTurn = playerHand.UpdateTouch();
             if (!playerTurn)
             {
                 playerState = Turn.Ended;
@@ -147,6 +177,10 @@ public class Game : MonoBehaviour
         }
     }
 
+    // If the computer's state is
+    //   Start - Begin the coroutine waiting a predefined time
+    //           before the computer chooses a card
+    //   Finish - Update the states.
     private void CheckCompTurn()
     {
         if (compState == Turn.Start)
@@ -169,6 +203,11 @@ public class Game : MonoBehaviour
         }
     }
 
+    // If the referee's state is
+    //   Start - Begin the coroutine waiting a predefined time
+    //           before the score is updated, the trick ends and
+    //           the next trick begins.
+    //   Finish - Update the referee's state.
     private void CheckRefTurn()
     {
         if (refState == Turn.Start)
@@ -182,11 +221,13 @@ public class Game : MonoBehaviour
         }
     }
 
+    // Moves the card to the lowest order still visible in the scene.
     private void MoveToMinOrder(GameObject card)
     {
         card.GetComponent<Renderer>().sortingOrder = MIN_VISIBLE_ORDER;
     }
 
+    // After a pause, chooses and moves a card from the computer's hand.
     private IEnumerator CompTurn()
     {
         yield return new WaitForSeconds(compWaitTime);
@@ -206,7 +247,8 @@ public class Game : MonoBehaviour
         compState = Turn.Finish;
     }
 
-    private Card UseStrategy(Card[] compCards, Card[] playerCards,
+    // Uses the strategy to choose a card.
+    private Card UseStrategy(Card[] cards, Card[] opponentCards,
         Card topCardScript)
     {
         Card chosenCard;
@@ -214,17 +256,21 @@ public class Game : MonoBehaviour
         if (playedCard != null)
         {
             Card playedCardScript = playedCard.GetComponent<Card>();
-            chosenCard = compStrategy.ChooseCard(compCards, playerCards,
+            chosenCard = compStrategy.ChooseCard(cards, opponentCards,
                 topCardScript, trumpSuit, playedCardScript);
         }
         else
         {
-            chosenCard = compStrategy.ChooseCard(compCards, playerCards,
+            chosenCard = compStrategy.ChooseCard(cards, opponentCards,
                 topCardScript, trumpSuit);
         }
         return chosenCard;
     }
 
+
+    // Updates the score, determines the trick winner, updates
+    // the states for the next trick, hides the played cards and
+    // deals a new card each.
     private IEnumerator EndTrick()
     {
         yield return new WaitForSeconds(endTrickWaitTime);
@@ -247,7 +293,8 @@ public class Game : MonoBehaviour
         refState = Turn.Finish;
     }
 
-    // Removes the moved cards from the player's hands
+    // Hides the moved cards in the scene.
+    // Removes the moved cards from the player's hands.
     private void HideMovedCards()
     {
         GameObject playerCard = playerHand.GetMovedCard();
@@ -258,6 +305,8 @@ public class Game : MonoBehaviour
         compHand.RemoveMovedCard();
     }
 
+    // Returns the trick points won by the player.
+    // If the computer won points, the result will be negative.
     private int GetTrickPoints()
     {
         string playerCard = playerHand.GetMovedCard().name;
@@ -275,6 +324,7 @@ public class Game : MonoBehaviour
         return points;
     }
 
+    // Returns true if the player won the trick.
     private bool DidPlayerWin()
     {
         string playerCard = playerHand.GetMovedCard().name;
@@ -304,7 +354,8 @@ public class Game : MonoBehaviour
         return false;
     }
 
-    // Trick winner draws first
+    // Draws a card for each player. Previous trick winner draws first.
+    // playerWon - True if the player won the last trick.
     private void DealCardEach(bool playerWon)
     {
         if (playerWon)
@@ -319,7 +370,9 @@ public class Game : MonoBehaviour
         }
     }
 
-    // Trick winner plays first
+    // Updates the state for the next trick.
+    // Previous trick winner plays first.
+    // playerWon - True if the player won the last trick.
     private void SetTurnOrder(bool playerWon)
     {
         if (playerWon)
@@ -334,6 +387,7 @@ public class Game : MonoBehaviour
         }
     }
 
+    // Restarts the game.
     public void Restart()
     {
         NewGame();

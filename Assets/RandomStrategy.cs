@@ -5,17 +5,17 @@ using System;
 
 public class RandomStrategy : Strategy
 {
-    public Card ChooseCard(Card[] compCards, Card[] opponentCards,
+    public Card ChooseCard(Card[] cards, Card[] opponentCards,
         Card topCard, char trumpSuit)
     {
         Random rand = new Random();
-        int randNum = rand.Next(0, compCards.Length);
-        return compCards[randNum];
+        int randNum = rand.Next(0, cards.Length);
+        return cards[randNum];
     }
 
-    public Card ChooseCard(Card[] compCards, Card[] opponentCards,
+    public Card ChooseCard(Card[] cards, Card[] opponentCards,
         Card topCard, char trumpSuit, Card playedCard)
     {
-        return ChooseCard(compCards, opponentCards, topCard, trumpSuit);
+        return ChooseCard(cards, opponentCards, topCard, trumpSuit);
     }
 }
