@@ -3,7 +3,7 @@
 
 using System;
 
-
+// Referee of the points and winning card in Briscola.
 // Assumes card1 was played first.
 public class BriscolaPoints : Points
 {
@@ -87,7 +87,7 @@ public class BriscolaPoints : Points
         return winningCard;
     }
 
-    // Returns the card of the winning suit.
+    // Returns the suit of the winning card.
     // If the suits are the same, "" is returned.
     private string GetWinningSuit(string card1, string card2, char trumpSuit)
     {

@@ -1,6 +1,7 @@
 ﻿// Briscola Scoperta
 // Author: traillj
 
+// Referee of the points and winning card in a point-trick game.
 public interface Points
 {
     // Card format examples:

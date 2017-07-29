@@ -360,13 +360,13 @@ public class Game : MonoBehaviour
     {
         if (playerWon)
         {
-            playerHand.AddCard(deck, pointsRef);
-            compHand.AddCard(deck, pointsRef);
+            playerHand.AddCard(deck);
+            compHand.AddCard(deck);
         }
         else
         {
-            compHand.AddCard(deck, pointsRef);
-            playerHand.AddCard(deck, pointsRef);
+            compHand.AddCard(deck);
+            playerHand.AddCard(deck);
         }
     }
 

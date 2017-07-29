@@ -3,6 +3,7 @@
 
 using System;
 
+// Chooses a card randomly.
 public class RandomStrategy : Strategy
 {
     public Card ChooseCard(Card[] cards, Card[] opponentCards,

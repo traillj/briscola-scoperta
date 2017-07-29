@@ -4,18 +4,21 @@
 using System;
 using UnityEngine;
 
+// Represents a hand of cards.
+// Controls whether cards can be moved.
 public class Hand
 {
+    // Number of cards in a hand
     private const int HAND_SIZE = 3;
 
     // Some indexes may be null
     private GameObject[] cards;
-
+    // Position of cards in hand
     private Vector3[] cardPositions;
 
-    // Number of cards currently in hand.
+    // Number of cards currently in hand
     private int numCards = 0;
-
+    // True if a card can be moved
     private bool canTouch;
 
     // Draws cards from the deck and moves them to
@@ -27,7 +30,7 @@ public class Hand
         cards = new GameObject[HAND_SIZE];
         for (int i = 0; i < cards.Length; i++)
         {
-            AddCard(deck, pointsRef, i);
+            AddCard(deck, i);
         }
     }
 
@@ -47,6 +50,7 @@ public class Hand
         return cardScripts;
     }
 
+    // Allows cards in hand to be moved when clicked.
     public void EnableTouch()
     {
         canTouch = true;
@@ -76,7 +80,7 @@ public class Hand
         return playerTurn;
     }
 
-    // Disables touch if any card in the hand has moved
+    // Disables touch if any card in the hand has moved.
     private void CheckMovement()
     {
         for (int i = 0; i < cards.Length; i++)
@@ -90,6 +94,7 @@ public class Hand
         }
     }
 
+    // Prevents cards in hand from moving when clicked.
     private void DisableTouch()
     {
         canTouch = false;
@@ -139,29 +144,29 @@ public class Hand
 
     // Returns true if a card was added to the hand,
     // false otherwise.
-    public bool AddCard(Deck deck, Points pointsRef)
+    public bool AddCard(Deck deck)
     {
         for (int i = 0; i < cards.Length; i++)
         {
             if (cards[i] == null)
             {
-                AddCard(deck, pointsRef, i);
+                AddCard(deck, i);
                 return true;
             }
         }
         return false;
     }
 
-    // pos = Position of the card from the left, left most is at pos 0.
-    private void AddCard(Deck deck, Points pointsRef, int pos)
+    // Moves the top card from the deck to specified position in the hand.
+    // pos - position of the card from the left, left most is at pos 0.
+    private void AddCard(Deck deck, int pos)
     {
         numCards++;
         cards[pos] = deck.DrawTopCard();
         cards[pos].GetComponent<Transform>().position = cardPositions[pos];
     }
 
-    // Returns true if a card was removed,
-    // false otherwise.
+    // Returns true if a card was removed, false otherwise.
     public bool RemoveMovedCard()
     {
         bool cardRemoved = false;
@@ -175,6 +180,7 @@ public class Hand
         return cardRemoved;
     }
 
+    // True if there are no cards in the hand.
     public bool IsEmpty()
     {
         return (numCards == 0);
